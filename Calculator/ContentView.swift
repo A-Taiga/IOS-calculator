@@ -46,33 +46,57 @@ struct ContentView: View {
     @State private var firstNum: Double = 0
     @State private var operation : Buttons = .empty
     var body: some View {
-        VStack {
-            if operation != .empty {
-                Text(textField2)
-                    .font(.title)
-                    .frame(height: 150)
-                    .border(.black, width: 1)
-            }
-           
-            Text(textField)
-                .font(.title)
-                .frame(height: 150)
-                .border(.black, width: 1)
-            ForEach(buttons, id: \.self) { row in
+        ZStack{
+            Color.black
+                .ignoresSafeArea()
+            VStack {
+                HStack{
+                    Spacer()
+                    if operation != .empty {
+                        Text(textField2)
+                            .font(.system(size: 60))
+                            .foregroundColor(.white)
+                            .frame(height: 150)
+                            .border(.black, width: 1)
+                    } else {
+                        Text("")
+                            .font(.system(size: 40))
+                            .foregroundColor(.white)
+                            .frame(height: 150)
+                            .border(.black, width: 1)
+                    }
+                }
                 HStack {
-                    ForEach(row, id: \.self) { button in
-                        Button(action: {
-                            display(button: button)
-                        }) {
-                            Rectangle()
-                                .frame(width: 90, height: 90)
-                                .foregroundColor(buttonColor(button: button))
-                                .overlay(
-                                    Text(button.rawValue)
-                                        .font(.title)
-                                        .foregroundColor(.black)
-                                )
-                                
+                    Spacer()
+                    Text(textField)
+                        .font(.system(size: 60))
+                        .foregroundColor(.white)
+                        .frame(height: 150)
+                        .border(.black, width: 1)
+                }
+                ForEach(buttons, id: \.self) { row in
+                    HStack(spacing: 5) {
+                        ForEach(row, id: \.self) { button in
+                            Button(action: {
+                                display(button: button)
+                            }) {
+                                Rectangle()
+                                 
+                                    .frame(width: buttonWidth(button: button), height: 90)
+                                    .foregroundColor(buttonColor(button: button))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        Text(button.rawValue)
+                                            .font(.title)
+                                            .foregroundColor(.black)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                                .stroke(.black)
+                                    )
+                                    .shadow(radius: 5)
+                                    
+                            }
                         }
                     }
                 }
@@ -83,11 +107,11 @@ struct ContentView: View {
 
 extension ContentView {
     
-    enum Operation {
-        case divide
-        case multiply
-        case subtract
-        case add
+    func buttonWidth(button: Buttons) -> CGFloat {
+        switch button {
+        case .zero: return ((UIScreen.main.bounds.width - 12) / 4) * 2
+        default: return (UIScreen.main.bounds.width - (5*5)) / 4
+        }
     }
     
     
@@ -95,7 +119,7 @@ extension ContentView {
         switch button {
         case .divide, .multiply, .subtract, .add: math(operation: button)
         case .equal: math(operation: button)
-        case .clear: textField = ""
+        case .clear: textField = ""; textField2 = ""
         case .negative:
             if textField.contains("-") {
                textField = textField.replacingOccurrences(of: "-", with: "")
@@ -111,34 +135,38 @@ extension ContentView {
             firstNum = (textField as NSString).doubleValue
             self.operation = operation
             textField = ""
-            textField2 = String(firstNum)
+            textField2 = String(firstNum) + operation.rawValue
         }
         else if operation == .multiply {
             firstNum = (textField as NSString).doubleValue
             self.operation = operation
             textField = ""
-            textField2 = String(firstNum)
+            textField2 = String(firstNum) + operation.rawValue
             
         }
         else if operation == .subtract {
             firstNum = (textField as NSString).doubleValue
             self.operation = operation
             textField = ""
-            textField2 = String(firstNum)
+            textField2 = String(firstNum) + operation.rawValue
         }
         else if operation == .add {
             firstNum = (textField as NSString).doubleValue
             self.operation = operation
             textField = ""
-            textField2 = String(firstNum)
+            textField2 = String(firstNum) + operation.rawValue
         }
         else if operation == .equal {
             let num: Double = (textField as NSString).doubleValue
             switch self.operation {
-            case .divide:   textField = String(firstNum / num)
-            case .multiply: textField = String(firstNum * num)
-            case .subtract: textField = String(firstNum - num)
-            case .add:      textField = String(firstNum + num)
+            case .divide:   textField2 = String(firstNum / num);
+                            textField = ""
+            case .multiply: textField2 = String(firstNum * num);
+                            textField = ""
+            case .subtract: textField2 = String(firstNum - num);
+                            textField = ""
+            case .add:      textField2 = String(firstNum + num);
+                            textField = ""
             default: break
             }
         }
