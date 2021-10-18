@@ -41,7 +41,7 @@ struct ContentView: View {
                                 [.four, .five, .six, .subtract],
                                 [.one, .two, .three, .add],
                                 [.zero, .decimal, .equal]]
-    @State private var textField = ""
+    @State private var textField = "0"
     @State private var textField2 = ""
     @State private var firstNum: Double = 0
     @State private var operation : Buttons = .empty
@@ -116,22 +116,30 @@ extension ContentView {
     
     
     func display(button: Buttons) {
+        if textField == "0" {
+            textField = ""
+        }
         switch button {
         case .divide, .multiply, .subtract, .add: math(operation: button)
         case .equal: math(operation: button)
-        case .clear: textField = ""; textField2 = ""
+        case .clear: textField = "0"; textField2 = ""; operation = .empty
         case .negative:
             if textField.contains("-") {
                textField = textField.replacingOccurrences(of: "-", with: "")
             } else {
                 textField = "-" + textField
             }
+        case .percent: math(operation: button)
         default: textField += button.rawValue
         }
     }
     
     func math(operation: Buttons) {
-        if operation == .divide {
+        if operation == .percent {
+            firstNum = (textField as NSString).doubleValue
+            textField = String(firstNum / 100)
+        }
+        else if operation == .divide {
             firstNum = (textField as NSString).doubleValue
             self.operation = operation
             textField = ""
@@ -157,6 +165,9 @@ extension ContentView {
             textField2 = String(firstNum) + operation.rawValue
         }
         else if operation == .equal {
+            if self.operation == .empty || textField.isEmpty {
+                return
+            }
             let num: Double = (textField as NSString).doubleValue
             switch self.operation {
             case .divide:   textField2 = String(firstNum / num);
